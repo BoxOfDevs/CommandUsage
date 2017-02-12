@@ -1,0 +1,9 @@
+---
+name: CommandUsage
+author:  BoxOfDevs
+version: 1.0
+api: [2.0.0]
+main: "BoxOfDevs\CommandUsage\Main"
+commands: []
+permissions: []
+...

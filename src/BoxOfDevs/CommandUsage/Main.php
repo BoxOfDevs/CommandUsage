@@ -133,8 +133,21 @@ class Main extends PluginBase implements Listener {
     Properly set args back to their original position
     @param     $event    \pocketmine\event\server\DataPacketReceiveEvent
     */
-    public function functionName(\pocketmine\event\server\DataPacketReceiveEvent $event) {
-        # Code
+    public function onDataPacketReceive(\pocketmine\event\server\DataPacketReceiveEvent $event) {
+        if($event->getPacket() instanceof \pocketmine\network\protocol\CommandStepPacket) {
+            if($event->getPacket()->args !== null) {
+                $ordered = "";
+                $args = $event->getPacket()->args;
+                $cmd = $this->cmds->{$event->getPacket()->command};
+                $args2 = $cmd->versions[0]->overloads->default->input->parameters;
+                foreach($args2 as $key => $arg) {
+                    if(isset($args->{$arg->name})) {
+                        $ordered .= $args->{$arg->name} . " ";
+                    }
+                }
+                $event->getPacket()->args = ["args" => $ordered];
+            }
+        }
     }
 
 

@@ -27,14 +27,12 @@ class Main extends PluginBase implements Listener {
 
    public function onEnable(){
         $this->lastCheck = null;
-        $this->cmds = [];
+        $this->cmds = new \stdClass();
         $this->saveDefaultConfig();
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
 
         // Loading all commands.
-        foreach($this->getServer()->getCommandMap()->getCommands() as $command) {
-            $this->setClientUsage($command, $command->getUsage());
-        }
+        $this->getServer()->getScheduler()->scheduleDelayedTask(new RegisterTask($this), 2); // Registers after all commands are loaded
     }
 
 
@@ -44,17 +42,25 @@ class Main extends PluginBase implements Listener {
     @param     $usage    string
     */
     public function setClientUsage(\pocketmine\command\Command $cmd, string $usage) {
-        $cmdData = $cmd->getCommandData();
-        preg_match_all("/((<(.+?)>)|(\[(.+?)\]))/", $cmd->getUsage(), $matches);
+        $cmdData =  json_decode(file_get_contents($this->getServer()->getFilePath() . "src/pocketmine/resources/command_default.json"));
+        if(substr($cmd->getUsage(), 0,1) == "%") {
+            echo substr($cmd->getUsage(), 0,1);
+            $usage = $this->getServer()->getLanguage()->translateString(substr($cmd->getUsage(), 1), []);
+        } else {
+            echo substr($cmd->getUsage(), 0,1);
+            $usage = $cmd->getUsage();
+        }
+        $this->getLogger()->debug("Processing " . $cmd->getName() . " with usage " . $usage);
+        preg_match_all("/((<(.+?)>)|(\[(.+?)\]))/", $usage, $matches);
         $data = [];
         foreach($matches[0] as $match) {
             $data[] = $this->string2Std($match);
             $this->getLogger()->debug("Arg $match in command " . $cmd->getName() . " is " . json_encode($data[count($data) - 1]));
         }
         $cmdData->overloads->default->input->parameters = $data;
-        $this->cmds->{$command->getName()} = new \stdClass();
-        $this->cmds->{$command->getName()}->versions = [];
-        $this->cmds->{$command->getName()}->versions[0] = $cmdData;
+        $this->cmds->{$cmd->getName()} = new \stdClass();
+        $this->cmds->{$cmd->getName()}->versions = [];
+        $this->cmds->{$cmd->getName()}->versions[0] = $cmdData;
     }
 
 
@@ -76,7 +82,7 @@ class Main extends PluginBase implements Listener {
             $return->optional = true;
             return $return;
         }
-        $return->name = $m[0];
+        $return->name = $m[1];
         switch(true) {
             case strpos(strtolower($m[0]), "player") || strpos(strtolower($m[0]), "target"):
             $return->type = "target";
@@ -105,7 +111,7 @@ class Main extends PluginBase implements Listener {
             $return->type = "gamemode";
             break;
             default:
-            $return->type = "rawtext";
+            $return->type = "string";
             break;
         }
         return $return;
@@ -120,6 +126,15 @@ class Main extends PluginBase implements Listener {
         if($event->getPacket() instanceof \pocketmine\network\protocol\AvailableCommandsPacket) {
             $event->getPacket()->commands = json_encode($this->cmds);
         }
+    }
+
+
+    /*
+    Properly set args back to their original position
+    @param     $event    \pocketmine\event\server\DataPacketReceiveEvent
+    */
+    public function functionName(\pocketmine\event\server\DataPacketReceiveEvent $event) {
+        # Code
     }
 
 

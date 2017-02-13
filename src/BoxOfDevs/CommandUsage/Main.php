@@ -111,6 +111,9 @@ class Main extends PluginBase implements Listener {
             case strpos(strtolower($m[0]), "gamemode"):
             $return->type = "gamemode";
             break;
+            case strpos(strtolower($m[0]), "..."):
+            $return->type = "rawtext";
+            break;
             default:
             $return->type = "string";
             break;
@@ -140,13 +143,13 @@ class Main extends PluginBase implements Listener {
                 $ordered = "";
                 $args = $event->getPacket()->args;
                 $cmd = $this->cmds->{$event->getPacket()->command};
-                $args2 = $cmd->versions[0]->overloads->{$event->getPacket()}->input->parameters;
+                $args2 = $cmd->versions[0]->overloads->{$event->getPacket()->overload}->input->parameters;
                 foreach($args2 as $key => $arg) {
                     if(isset($args->{$arg->name})) {
                         $ordered .= $args->{$arg->name} . " ";
                     }
                 }
-                $event->getPacket()->args = ["args" => $ordered];
+                $event->getPacket()->args = ["args" => substr($ordered, 0, strlen($ordered) - 1)];
             }
         }
     }

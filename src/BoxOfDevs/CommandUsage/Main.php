@@ -32,7 +32,7 @@ class Main extends PluginBase implements Listener {
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
 
         // Loading all commands.
-        $this->getServer()->getScheduler()->scheduleDelayedTask(new RegisterTask($this), 2); // Registers after all commands are loaded
+        $this->getServer()->getScheduler()->scheduleRepeatingTask(new RegisterTask($this), 20 * 30); // Registers after all commands are loaded
     }
 
 
@@ -50,13 +50,13 @@ class Main extends PluginBase implements Listener {
             echo substr($cmd->getUsage(), 0,1);
             $usage = $cmd->getUsage();
         }
-        $this->getLogger()->debug("Processing " . $cmd->getName() . " with usage " . $usage);
+        // $this->getLogger()->debug("Processing " . $cmd->getName() . " with usage " . $usage);
         preg_match_all("/((<(.+?)>)|(\[(.+?)\]))/", $usage, $matches);
         $data = [];
         foreach($matches[0] as $key => $match) {
             $data[] = $this->string2Std($match);
             if(count($matches[0]) - 1 == $key && isset($data[$key]->type) && $data[$key]->type == "string") $data[$key]->type = "rawtext";
-            $this->getLogger()->debug("Arg $match in command " . $cmd->getName() . " is " . json_encode($data[count($data) - 1]));
+            // $this->getLogger()->debug("Arg $match in command " . $cmd->getName() . " is " . json_encode($data[count($data) - 1]));
         }
         $cmdData->overloads->default->input->parameters = $data;
         $this->cmds->{$cmd->getName()} = new \stdClass();

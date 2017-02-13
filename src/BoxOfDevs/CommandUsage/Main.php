@@ -44,10 +44,10 @@ class Main extends PluginBase implements Listener {
     public function setClientUsage(\pocketmine\command\Command $cmd, string $usage) {
         $cmdData =  json_decode(file_get_contents($this->getServer()->getFilePath() . "src/pocketmine/resources/command_default.json"));
         if(substr($cmd->getUsage(), 0,1) == "%") {
-            echo substr($cmd->getUsage(), 0,1);
+            // echo substr($cmd->getUsage(), 0,1);
             $usage = $this->getServer()->getLanguage()->translateString(substr($cmd->getUsage(), 1), []);
         } else {
-            echo substr($cmd->getUsage(), 0,1);
+            // echo substr($cmd->getUsage(), 0,1);
             $usage = $cmd->getUsage();
         }
         // $this->getLogger()->debug("Processing " . $cmd->getName() . " with usage " . $usage);

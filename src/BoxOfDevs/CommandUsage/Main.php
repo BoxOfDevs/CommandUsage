@@ -28,6 +28,7 @@ class Main extends PluginBase implements Listener {
    public function onEnable(){
         $this->lastCheck = null;
         $this->cmds = new \stdClass();
+        $this->aliases = [];
         $this->saveDefaultConfig();
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
 
@@ -43,21 +44,26 @@ class Main extends PluginBase implements Listener {
     */
     public function setClientUsage(\pocketmine\command\Command $cmd, string $usage) {
         $cmdData =  json_decode(file_get_contents($this->getServer()->getFilePath() . "src/pocketmine/resources/command_default.json"));
+        //Getting the usage.
         if(substr($cmd->getUsage(), 0,1) == "%") {
-            // echo substr($cmd->getUsage(), 0,1);
             $usage = $this->getServer()->getLanguage()->translateString(substr($cmd->getUsage(), 1), []);
         } else {
-            // echo substr($cmd->getUsage(), 0,1);
             $usage = $cmd->getUsage();
         }
-        // $this->getLogger()->debug("Processing " . $cmd->getName() . " with usage " . $usage);
+        // Parsing arguments
         preg_match_all("/((<(.+?)>)|(\[(.+?)\]))/", $usage, $matches);
         $data = [];
         foreach($matches[0] as $key => $match) {
             $data[] = $this->string2Std($match);
             if(count($matches[0]) - 1 == $key && isset($data[$key]->type) && $data[$key]->type == "string") $data[$key]->type = "rawtext";
-            // $this->getLogger()->debug("Arg $match in command " . $cmd->getName() . " is " . json_encode($data[count($data) - 1]));
         }
+        // Setting the command data
+        foreach($cmd->getAliases() as $alias) {
+            $this->aliases[$alias] = $cmd->getName();
+        }
+        $cmdData->aliases = $cmd->getAliases();
+        $cmdData->description = $cmd->getDescription();
+        $cmdData->permission = $cmd->getPermission();
         $cmdData->overloads->default->input->parameters = $data;
         $this->cmds->{$cmd->getName()} = new \stdClass();
         $this->cmds->{$cmd->getName()}->versions = [];
@@ -142,7 +148,11 @@ class Main extends PluginBase implements Listener {
             if($event->getPacket()->args !== null) {
                 $ordered = "";
                 $args = $event->getPacket()->args;
-                $cmd = $this->cmds->{$event->getPacket()->command};
+                if(!isset($this->cmds->{$event->getPacket()->command})) {
+                    $cmd = $this->cmds->{$this->aliases[$event->getPacket()->command]};
+                } else {
+                    $cmd = $this->cmds->{$event->getPacket()->command};
+                }
                 $args2 = $cmd->versions[0]->overloads->{$event->getPacket()->overload}->input->parameters;
                 foreach($args2 as $key => $arg) {
                     if(isset($args->{$arg->name})) {

@@ -53,8 +53,9 @@ class Main extends PluginBase implements Listener {
         $this->getLogger()->debug("Processing " . $cmd->getName() . " with usage " . $usage);
         preg_match_all("/((<(.+?)>)|(\[(.+?)\]))/", $usage, $matches);
         $data = [];
-        foreach($matches[0] as $match) {
+        foreach($matches[0] as $key => $match) {
             $data[] = $this->string2Std($match);
+            if(count($matches[0]) - 1 == $key && isset($data[$key]->type) && $data[$key]->type == "string") $data[$key]->type = "rawtext";
             $this->getLogger()->debug("Arg $match in command " . $cmd->getName() . " is " . json_encode($data[count($data) - 1]));
         }
         $cmdData->overloads->default->input->parameters = $data;
@@ -139,7 +140,7 @@ class Main extends PluginBase implements Listener {
                 $ordered = "";
                 $args = $event->getPacket()->args;
                 $cmd = $this->cmds->{$event->getPacket()->command};
-                $args2 = $cmd->versions[0]->overloads->default->input->parameters;
+                $args2 = $cmd->versions[0]->overloads->{$event->getPacket()}->input->parameters;
                 foreach($args2 as $key => $arg) {
                     if(isset($args->{$arg->name})) {
                         $ordered .= $args->{$arg->name} . " ";

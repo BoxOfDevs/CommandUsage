@@ -32,7 +32,7 @@ class Main extends PluginBase implements Listener {
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
 
         // Loading all commands.
-        $this->getServer()->getScheduler()->scheduleRepeatingTask(new RegisterTask($this), 20 * 30); // Registers after all commands are loaded
+        $this->getServer()->getScheduler()->scheduleRepeatingTask(new RegisterTask($this), 20 * 5); // Registers after all commands are loaded
     }
 
 

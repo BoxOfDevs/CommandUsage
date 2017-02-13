@@ -27,5 +27,8 @@ class RegisterTask extends PluginTask {
        foreach($this->getOwner()->getServer()->getCommandMap()->getCommands() as $command) {
             $this->getOwner()->setClientUsage($command, $command->getUsage());
         }
+        foreach ($this->getOwner()->getServer()->getOnlinePlayers() as $p) {
+            $p->sendCommandData();
+        }
    }
 }

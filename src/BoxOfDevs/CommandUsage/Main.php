@@ -156,6 +156,24 @@ class Main extends PluginBase implements Listener {
                 $args2 = $cmd->versions[0]->overloads->{$event->getPacket()->overload}->input->parameters;
                 foreach($args2 as $key => $arg) {
                     if(isset($args->{$arg->name})) {
+                        var_dump($args->{$arg->name});
+                        if($args->{$arg->name} instanceof \stdClass) { 
+                            if(isset($args->{$arg->name}->rules)) {
+                                $args->{$arg->name} = $args->{$arg->name}->rules[0]->value;
+                            } else {
+                                switch($args->{$arg->name}->selector) {
+                                    case "randomPlayer":
+                                    $args->{$arg->name} = "@r";
+                                    break;
+                                    case "nearestPlayer":
+                                    $args->{$arg->name} = "@p";
+                                    break;
+                                    case "allPlayers":
+                                    $args->{$arg->name} = "@a";
+                                    break;
+                                }
+                            }
+                        }
                         $ordered .= $args->{$arg->name} . " ";
                     }
                 }

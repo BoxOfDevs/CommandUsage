@@ -9,25 +9,18 @@
 
 namespace BoxOfDevs\CommandUsage;
 
-
+use pocketmine\plugin\PluginBase;
+use pocketmine\event\Listener;
 use pocketmine\command\CommandSender;
 use pocketmine\command\Command;
-use pocketmine\event\Listener;
-use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
 use pocketmine\Player;
 
-
-
-
-
-
 class Main extends PluginBase implements Listener {
-
-
-   public function onEnable(){
-        $this->lastCheck = null;
-        $this->cmds = new \stdClass();
+	
+	public function onEnable(){
+		$this->lastCheck = null;
+		$this->cmds = new \stdClass();
         $this->aliases = [];
         $this->saveDefaultConfig();
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
@@ -36,29 +29,28 @@ class Main extends PluginBase implements Listener {
         $this->getServer()->getScheduler()->scheduleRepeatingTask(new RegisterTask($this), 20 * 5); // Registers after all commands are loaded
     }
 
-
     /*
     Sets the client command usage
     @param     $cmd    \pocketmine\command\Command
     @param     $usage    string
     */
-    public function setClientUsage(\pocketmine\command\Command $cmd, string $usage) {
-        $cmdData =  json_decode(file_get_contents($this->getServer()->getFilePath() . "src/pocketmine/resources/command_default.json"));
+    public function setClientUsage(\pocketmine\command\Command $cmd, string $usage){
+        $cmdData =  json_decode(file_get_contents($this->getServer()->getFilePath()."src/pocketmine/resources/command_default.json"));
         //Getting the usage.
-        if(substr($cmd->getUsage(), 0,1) == "%") {
+        if(substr($cmd->getUsage(), 0,1) == "%"){
             $usage = $this->getServer()->getLanguage()->translateString(substr($cmd->getUsage(), 1), []);
-        } else {
+        }else{
             $usage = $cmd->getUsage();
         }
         // Parsing arguments
         preg_match_all("/((<(.+?)>)|(\[(.+?)\]))/", $usage, $matches);
         $data = [];
-        foreach($matches[0] as $key => $match) {
+        foreach($matches[0] as $key => $match){
             $data[] = $this->string2Std($match);
             if(count($matches[0]) - 1 == $key && isset($data[$key]->type) && $data[$key]->type == "string") $data[$key]->type = "rawtext";
         }
         // Setting the command data
-        foreach($cmd->getAliases() as $alias) {
+        foreach($cmd->getAliases() as $alias){
             $this->aliases[$alias] = $cmd->getName();
         }
         $cmdData->aliases = $cmd->getAliases();
@@ -70,20 +62,18 @@ class Main extends PluginBase implements Listener {
         $this->cmds->{$cmd->getName()}->versions[0] = $cmdData;
     }
 
-
-
     /*
     Process a string like "<player>" or "[x]" and return a command data stdClass.
     @param     $data    string
     @return \stdClass|null
     */
-    protected function string2Std(string $data) {
-        $return = new \stdClass();
-        if(preg_match("/^<(.+?)>$/", $data, $m) > 0) {
+    protected function string2Std(string $data){
+		$return = new \stdClass();
+        if(preg_match("/^<(.+?)>$/", $data, $m) > 0){
             $return->optional = false;
-        } elseif(preg_match("/^\[(.+?)\]$/", $data, $m) > 0) {
+        }elseif(preg_match("/^\[(.+?)\]$/", $data, $m) > 0){
             $return->optional = true;
-        } else {
+        }else{
             $return->name = $data;
             $return->type = "rawtext";
             $return->optional = true;
@@ -127,41 +117,39 @@ class Main extends PluginBase implements Listener {
         return $return;
     }
 
-
     /*
     Checks when a command packet is sent
     @param     $event    \pocketmine\event\server\DataPacketSendEvent
     */
-    public function onDataPacketSend(\pocketmine\event\server\DataPacketSendEvent $event) {
-        if($event->getPacket() instanceof \pocketmine\network\protocol\AvailableCommandsPacket) {
+    public function onDataPacketSend(\pocketmine\event\server\DataPacketSendEvent $event){
+        if($event->getPacket() instanceof \pocketmine\network\protocol\AvailableCommandsPacket){
             $event->getPacket()->commands = json_encode($this->cmds);
         }
     }
-
 
     /*
     Properly set args back to their original position
     @param     $event    \pocketmine\event\server\DataPacketReceiveEvent
     */
-    public function onDataPacketReceive(\pocketmine\event\server\DataPacketReceiveEvent $event) {
-        if($event->getPacket() instanceof \pocketmine\network\protocol\CommandStepPacket) {
-            if($event->getPacket()->args !== null) {
+    public function onDataPacketReceive(\pocketmine\event\server\DataPacketReceiveEvent $event){
+        if($event->getPacket() instanceof \pocketmine\network\protocol\CommandStepPacket){
+            if($event->getPacket()->args !== null){
                 $ordered = "";
                 $args = $event->getPacket()->args;
-                if(!isset($this->cmds->{$event->getPacket()->command})) {
+                if(!isset($this->cmds->{$event->getPacket()->command})){
                     $cmd = $this->cmds->{$this->aliases[$event->getPacket()->command]};
-                } else {
+                }else{
                     $cmd = $this->cmds->{$event->getPacket()->command};
                 }
                 $args2 = $cmd->versions[0]->overloads->{$event->getPacket()->overload}->input->parameters;
-                foreach($args2 as $key => $arg) {
-                    if(isset($args->{$arg->name})) {
+                foreach($args2 as $key => $arg){
+                    if(isset($args->{$arg->name})){
                         var_dump($args->{$arg->name});
-                        if($args->{$arg->name} instanceof \stdClass) { 
-                            if(isset($args->{$arg->name}->rules)) {
+                        if($args->{$arg->name} instanceof \stdClass){ 
+                            if(isset($args->{$arg->name}->rules)){
                                 $args->{$arg->name} = $args->{$arg->name}->rules[0]->value;
-                            } else {
-                                switch($args->{$arg->name}->selector) {
+                            }else{
+                                switch($args->{$arg->name}->selector){
                                     case "randomPlayer":
                                     $args->{$arg->name} = "@r";
                                     break;
@@ -181,6 +169,4 @@ class Main extends PluginBase implements Listener {
             }
         }
     }
-
-
 }

@@ -9,26 +9,19 @@
 
 namespace BoxOfDevs\CommandUsage;
 
-
 use pocketmine\scheduler\PluginTask;
 
-
-
-
-
 class RegisterTask extends PluginTask {
-
-
-   /*
-   RUns when the tasks runs.
-   @param     $tick    int
-   */
-   public function onRun($tick) {
-       foreach($this->getOwner()->getServer()->getCommandMap()->getCommands() as $command) {
-            $this->getOwner()->setClientUsage($command, $command->getUsage());
+	/*
+	RUns when the tasks runs.
+	@param     $tick    int
+	*/
+	public function onRun($tick){
+		foreach($this->getOwner()->getServer()->getCommandMap()->getCommands() as $command){
+			$this->getOwner()->setClientUsage($command, $command->getUsage());
         }
-        foreach ($this->getOwner()->getServer()->getOnlinePlayers() as $p) {
-            $p->sendCommandData();
+        foreach($this->getOwner()->getServer()->getOnlinePlayers() as $p){
+			$p->sendCommandData();
         }
-   }
+	}
 }

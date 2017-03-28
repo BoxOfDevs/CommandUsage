@@ -12,10 +12,11 @@ namespace BoxOfDevs\CommandUsage;
 use pocketmine\scheduler\PluginTask;
 
 class RegisterTask extends PluginTask {
-	/*
-	RUns when the tasks runs.
-	@param     $tick    int
-	*/
+
+    public function __construct(Main $owner) {
+        parent::__construct($owner);
+    }
+
 	public function onRun($tick){
 		foreach($this->getOwner()->getServer()->getCommandMap()->getCommands() as $command){
 			$this->getOwner()->setClientUsage($command, $command->getUsage());

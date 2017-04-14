@@ -35,7 +35,7 @@ class Main extends PluginBase implements Listener {
     @param     $cmd    \pocketmine\command\Command
     @param     $usage    string
     */
-    public function setClientUsage(Command $cmd, string $usage) {
+    public function setClientUsage(Command $cmd, string $usage){
         $cmdData =  json_decode(file_get_contents($this->getServer()->getFilePath() . "src/pocketmine/resources/command_default.json"));
         //Getting the usage.
         if(substr($cmd->getUsage(), 0,1) == "%"){

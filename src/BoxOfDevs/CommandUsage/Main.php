@@ -9,12 +9,13 @@
 
 namespace BoxOfDevs\CommandUsage;
 
+use pocketmine\event\server\DataPacketReceiveEvent;
+use pocketmine\event\server\DataPacketSendEvent;
+use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
+use pocketmine\network\mcpe\protocol\CommandStepPacket;
 use pocketmine\plugin\PluginBase;
 use pocketmine\event\Listener;
-use pocketmine\command\CommandSender;
 use pocketmine\command\Command;
-use pocketmine\Server;
-use pocketmine\Player;
 
 class Main extends PluginBase implements Listener {
 	
@@ -34,8 +35,8 @@ class Main extends PluginBase implements Listener {
     @param     $cmd    \pocketmine\command\Command
     @param     $usage    string
     */
-    public function setClientUsage(\pocketmine\command\Command $cmd, string $usage){
-        $cmdData =  json_decode(file_get_contents($this->getServer()->getFilePath()."src/pocketmine/resources/command_default.json"));
+    public function setClientUsage(Command $cmd, string $usage) {
+        $cmdData =  json_decode(file_get_contents($this->getServer()->getFilePath() . "src/pocketmine/resources/command_default.json"));
         //Getting the usage.
         if(substr($cmd->getUsage(), 0,1) == "%"){
             $usage = $this->getServer()->getLanguage()->translateString(substr($cmd->getUsage(), 1), []);
@@ -119,20 +120,20 @@ class Main extends PluginBase implements Listener {
 
     /*
     Checks when a command packet is sent
-    @param     $event    \pocketmine\event\server\DataPacketSendEvent
+    @param     $event    DataPacketSendEvent
     */
-    public function onDataPacketSend(\pocketmine\event\server\DataPacketSendEvent $event){
-        if($event->getPacket() instanceof \pocketmine\network\protocol\AvailableCommandsPacket){
+    public function onDataPacketSend(DataPacketSendEvent $event){
+        if($event->getPacket() instanceof AvailableCommandsPacket){
             $event->getPacket()->commands = json_encode($this->cmds);
         }
     }
 
     /*
     Properly set args back to their original position
-    @param     $event    \pocketmine\event\server\DataPacketReceiveEvent
+    @param     $event    DataPacketReceiveEvent
     */
-    public function onDataPacketReceive(\pocketmine\event\server\DataPacketReceiveEvent $event){
-        if($event->getPacket() instanceof \pocketmine\network\protocol\CommandStepPacket){
+    public function onDataPacketReceive(DataPacketReceiveEvent $event){
+        if($event->getPacket() instanceof CommandStepPacket){
             if($event->getPacket()->args !== null){
                 $ordered = "";
                 $args = $event->getPacket()->args;

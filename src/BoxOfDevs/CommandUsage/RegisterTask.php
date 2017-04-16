@@ -1,4 +1,5 @@
 <?php
+
 #   ____                                          _ _   _                      
 #  / ___|___  _ __ ___  _ __ ___   __ _ _ __   __| | | | |___  __ _  __ _  ___ 
 # | |   / _ \| '_ ` _ \| '_ ` _ \ / _` | '_ \ / _` | | | / __|/ _` |/ _` |/ _ \
@@ -12,6 +13,7 @@ namespace BoxOfDevs\CommandUsage;
 use pocketmine\scheduler\PluginTask;
 
 class RegisterTask extends PluginTask {
+	
 	/*
 	RUns when the tasks runs.
 	@param     $tick    int
@@ -22,6 +24,6 @@ class RegisterTask extends PluginTask {
         }
         foreach($this->getOwner()->getServer()->getOnlinePlayers() as $p){
 			$p->sendCommandData();
-        }
+	}
 	}
 }

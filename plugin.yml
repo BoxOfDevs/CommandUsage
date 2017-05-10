@@ -8,6 +8,6 @@
 name: CommandUsage
 author: BoxOfDevs
 version: 1.0
-api: [2.0.0, 3.0.0]
+api: [2.0.0, 3.0.0, 3.0.0-ALPHA5]
 main: BoxOfDevs\CommandUsage\Main
 load: POSTWORLD

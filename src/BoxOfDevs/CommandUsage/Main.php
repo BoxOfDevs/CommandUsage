@@ -1,4 +1,5 @@
 <?php
+
 #   ____                                          _ _   _                      
 #  / ___|___  _ __ ___  _ __ ___   __ _ _ __   __| | | | |___  __ _  __ _  ___ 
 # | |   / _ \| '_ ` _ \| '_ ` _ \ / _` | '_ \ / _` | | | / __|/ _` |/ _` |/ _ \
@@ -11,8 +12,8 @@ namespace BoxOfDevs\CommandUsage;
 
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\event\server\DataPacketSendEvent;
-use pocketmine\network\protocol\AvailableCommandsPacket;
-use pocketmine\network\protocol\CommandStepPacket;
+use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
+use pocketmine\network\mcpe\protocol\CommandStepPacket;
 use pocketmine\plugin\PluginBase;
 use pocketmine\event\Listener;
 use pocketmine\command\Command;
@@ -36,6 +37,7 @@ class Main extends PluginBase implements Listener {
     }
 
     /**
+     * Sets the client command usage
      * @param Command $cmd
      * @param string $usage
      */
@@ -44,6 +46,8 @@ class Main extends PluginBase implements Listener {
         //Getting the usage.
         if(substr($cmd->getUsage(), 0,1) == "%"){
             $usage = $this->getServer()->getLanguage()->translateString(substr($cmd->getUsage(), 1), []);
+        }else{
+            $usage = $cmd->getUsage();
         }
         // Parsing arguments
         preg_match_all("/((<(.+?)>)|(\[(.+?)\]))/", $usage, $matches);
@@ -120,6 +124,7 @@ class Main extends PluginBase implements Listener {
     }
 
     /**
+     * Checks when a command packet is sent
      * @priority MONITOR
      *
      * @param DataPacketSendEvent $event
@@ -131,6 +136,7 @@ class Main extends PluginBase implements Listener {
     }
 
     /**
+     * Properly set args back to their original position
      * @priority MONITOR
      *
      * @param DataPacketReceiveEvent $event
